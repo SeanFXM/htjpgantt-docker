@@ -193,3 +193,16 @@
 
 - 检查 `TAIGA_SITES_DOMAIN` 是否与 gateway 域名一致
 - 确认已执行 `migrate` 和 `createsuperuser`
+
+### 4. gateway 504 / upstream timed out（API 请求超时）
+
+若日志出现 `upstream timed out (110: Operation timed out) while connecting to upstream`：
+
+1. **确认 taiga-back 状态**：Railway 控制台 → taiga-back → 状态应为 Online
+2. **检查端口**：taiga-back 的 **Settings → Networking** 端口为 **8000**
+3. **验证内部连通性**：在 gateway 的 Shell 中执行：
+   ```bash
+   wget -qO- --timeout=5 http://taiga-back.railway.internal:8000/api/v1/ 2>&1 || echo "连接失败"
+   ```
+4. **冷启动**：若 taiga-back 有 scale-to-zero，首次请求可能较慢；nginx 已配置 120s 超时
+5. **同项目同环境**：确保 gateway 与 taiga-back 在同一 Railway 项目、同一 Environment（如 Production）
