@@ -23,9 +23,10 @@
 
 ## 一、前置条件
 
-1. 前端已部署：`htjpgantt-front` 在 Railway 上可访问
-2. 本仓库 `htjpgantt-docker` 已推送到 GitHub
-3. Railway 账号：https://railway.app
+1. 本仓库 `htjpgantt-docker` 已推送到 GitHub（✅ 已推送）
+2. Railway 账号：https://railway.app
+
+> **说明**：gateway 已内置前端（从 ghcr.io/seanfxm/htjpgantt-front 拉取），部署 gateway 后即可访问完整应用，无需单独部署前端。
 
 ---
 
