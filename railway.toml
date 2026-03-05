@@ -1,0 +1,12 @@
+# Railway 网关服务构建配置
+# 当从 GitHub 部署 htjpgantt-docker 时使用
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "railway/Dockerfile.gateway"
+
+[deploy]
+startCommand = ""
+healthcheckPath = "/"
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 10
