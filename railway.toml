@@ -7,6 +7,6 @@ dockerfilePath = "railway/Dockerfile.gateway"
 [deploy]
 startCommand = ""
 healthcheckPath = "/"
-healthcheckTimeout = 30
+healthcheckTimeout = 60
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
