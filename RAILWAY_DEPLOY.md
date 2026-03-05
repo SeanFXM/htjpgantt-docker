@@ -73,10 +73,15 @@
 
 ### 4. taiga-back
 
-- **+ New** → **Docker Image**
-- 镜像：`taigaio/taiga-back:latest`
+- **+ New** → **GitHub Repo** → 选择 **SeanFXM/htjpgantt-docker**
 - 服务名：**taiga-back**
+- **Settings** → **Build**：
+  - Builder：**Dockerfile**
+  - Dockerfile Path：`railway/Dockerfile.taiga-back`
+  - Root Directory：留空
 - **Settings** → **Networking** → 端口填 **8000**
+
+> **说明**：使用定制镜像（绑定 `[::]:8000`）以支持 Railway IPv6 内部网络，解决 gateway 超时问题。
 - **Variables** 添加（按实际值替换）：
 
   ```
@@ -198,11 +203,12 @@
 
 若日志出现 `upstream timed out (110: Operation timed out) while connecting to upstream`：
 
-1. **确认 taiga-back 状态**：Railway 控制台 → taiga-back → 状态应为 Online
-2. **检查端口**：taiga-back 的 **Settings → Networking** 端口为 **8000**
-3. **验证内部连通性**：在 gateway 的 Shell 中执行：
+1. **使用定制 taiga-back**：必须用 `railway/Dockerfile.taiga-back`（绑定 `[::]:8000`）部署 taiga-back，否则 Railway IPv6 内部网络无法连通。若当前为 Docker Image `taigaio/taiga-back:latest`，请改为从 **GitHub Repo** 部署，Dockerfile Path 填 `railway/Dockerfile.taiga-back`。
+2. **确认 taiga-back 状态**：Railway 控制台 → taiga-back → 状态应为 Online
+3. **检查端口**：taiga-back 的 **Settings → Networking** 端口为 **8000**
+4. **验证内部连通性**：在 gateway 的 Shell 中执行：
    ```bash
    wget -qO- --timeout=5 http://taiga-back.railway.internal:8000/api/v1/ 2>&1 || echo "连接失败"
    ```
-4. **冷启动**：若 taiga-back 有 scale-to-zero，首次请求可能较慢；nginx 已配置 120s 超时
-5. **同项目同环境**：确保 gateway 与 taiga-back 在同一 Railway 项目、同一 Environment（如 Production）
+5. **冷启动**：若 taiga-back 有 scale-to-zero，首次请求可能较慢；nginx 已配置 120s 超时
+6. **同项目同环境**：确保 gateway 与 taiga-back 在同一 Railway 项目、同一 Environment（如 Production）
