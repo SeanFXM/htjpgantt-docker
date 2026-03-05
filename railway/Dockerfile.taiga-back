@@ -1,6 +1,7 @@
-# Railway 定制 taiga-back：绑定 [::]:8000 以支持 IPv6 内部网络
-# 参考: https://help.railway.com/questions/private-networking-completely-broken-bet-28b2a26f
+# Railway 定制 taiga-back：绑定 [::]:8000 以同时支持 IPv4 和 IPv6
+# Railway 内部网络使用 IPv6，官方镜像仅监听 0.0.0.0（IPv4），导致 gateway 连接超时
 FROM taigaio/taiga-back:latest
-COPY railway/entrypoint-taiga-back.sh /taiga-back/docker/railway-entrypoint.sh
-RUN chmod +x /taiga-back/docker/railway-entrypoint.sh
-ENTRYPOINT ["./docker/railway-entrypoint.sh"]
+
+# 直接覆盖官方 entrypoint，确保 ENTRYPOINT ["./docker/entrypoint.sh"] 执行我们的版本
+COPY railway/entrypoint-taiga-back.sh /taiga-back/docker/entrypoint.sh
+RUN chmod +x /taiga-back/docker/entrypoint.sh
