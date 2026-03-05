@@ -2,7 +2,27 @@
 # Railway 内部网络使用 IPv6，官方镜像仅监听 0.0.0.0（IPv4），导致 gateway 连接超时
 FROM taigaio/taiga-back:latest
 
-# 直接用 sed 修改官方 entrypoint 中的 --bind 参数
-# 将 0.0.0.0:8000 改为 [::]:8000，使 gunicorn 同时监听 IPv4 和 IPv6
-RUN sed -i "s|--bind 0.0.0.0:8000|--bind '[::]:8000'|g" /taiga-back/docker/entrypoint.sh && \
-    cat /taiga-back/docker/entrypoint.sh | grep -A1 'bind'
+# 强制破坏 Docker 缓存
+ARG CACHEBUST=2026030501
+
+# 直接重写整个 entrypoint，避免 sed/COPY 不生效的问题
+RUN printf '#!/usr/bin/env bash\n\
+set -euo pipefail\n\
+echo Executing pending migrations\n\
+python manage.py migrate\n\
+echo Load default templates\n\
+python manage.py loaddata initial_project_templates\n\
+echo Give permission to taiga:taiga after mounting volumes\n\
+chown -R taiga:taiga /taiga-back\n\
+echo Starting Taiga API...\n\
+exec gosu taiga gunicorn taiga.wsgi:application \\\n\
+    --name taiga_api \\\n\
+    --bind '"'"'[::]:8000'"'"' \\\n\
+    --workers 3 \\\n\
+    --worker-tmp-dir /dev/shm \\\n\
+    --log-level=info \\\n\
+    --access-logfile - \\\n\
+    "$@"\n' > /taiga-back/docker/entrypoint.sh && \
+    chmod +x /taiga-back/docker/entrypoint.sh && \
+    echo "=== Verify entrypoint ===" && \
+    cat /taiga-back/docker/entrypoint.sh
