@@ -2,6 +2,7 @@
 # Railway 内部网络使用 IPv6，官方镜像仅监听 0.0.0.0（IPv4），导致 gateway 连接超时
 FROM taigaio/taiga-back:latest
 
-# 直接覆盖官方 entrypoint，确保 ENTRYPOINT ["./docker/entrypoint.sh"] 执行我们的版本
-COPY railway/entrypoint-taiga-back.sh /taiga-back/docker/entrypoint.sh
-RUN chmod +x /taiga-back/docker/entrypoint.sh
+# 直接用 sed 修改官方 entrypoint 中的 --bind 参数
+# 将 0.0.0.0:8000 改为 [::]:8000，使 gunicorn 同时监听 IPv4 和 IPv6
+RUN sed -i "s|--bind 0.0.0.0:8000|--bind '[::]:8000'|g" /taiga-back/docker/entrypoint.sh && \
+    cat /taiga-back/docker/entrypoint.sh | grep -A1 'bind'
